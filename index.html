@@ -87,35 +87,34 @@
     <div id="response"></div>
 
     <script>
+        // Cloudflare Worker URL (замените на свой)
+        const PROXY_URL = 'https://your-worker.your-domain.workers.dev';
         const API_TOKEN = 'FEC0143D7207AB50E062366312BBE64B0C46EDBD';
-        const API_URL = 'http://koturaet.beget.tech/proxy.php';
 
+        // Обработчик изменения типа транспорта
         document.getElementById('transportType').addEventListener('change', function() {
             const isCarSelected = this.value === 'car';
-            const driverLicense = document.getElementById('driverLicense');
-            const driverLicensePhoto = document.getElementById('driverLicensePhoto');
-            
-            driverLicense.disabled = !isCarSelected;
-            driverLicensePhoto.disabled = !isCarSelected;
+            document.getElementById('driverLicense').disabled = !isCarSelected;
+            document.getElementById('driverLicensePhoto').disabled = !isCarSelected;
             
             if (!isCarSelected) {
-                driverLicense.value = '';
-                driverLicensePhoto.value = '';
+                document.getElementById('driverLicense').value = '';
+                document.getElementById('driverLicensePhoto').value = '';
             }
         });
 
+        // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', () => {
-            const transportSelect = document.getElementById('transportType');
-            transportSelect.dispatchEvent(new Event('change'));
+            document.getElementById('transportType').dispatchEvent(new Event('change'));
         });
 
+        // Отправка формы
         document.getElementById('courierForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const responseDiv = document.getElementById('response');
-            responseDiv.innerHTML = '';
+            responseDiv.innerHTML = 'Отправка данных...';
             
             const formData = {
-                courier_partner_id: null,
                 surname: document.getElementById('surname').value.trim(),
                 name: document.getElementById('name').value.trim(),
                 middlename: document.getElementById('middlename').value.trim() || null,
@@ -129,7 +128,7 @@
             };
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -153,9 +152,7 @@
                 if (result.parameter_errors) {
                     output += `<div class="error"><strong>Ошибки полей:</strong><ul>${
                         Object.entries(result.parameter_errors)
-                            .map(([field, errors]) => 
-                                `<li>${field}: ${errors.join(', ')}</li>`
-                            ).join('')
+                            .map(([field, errors]) => `<li>${field}: ${errors.join(', ')}</li>`).join('')
                     }</ul></div>`;
                 }
 
@@ -173,20 +170,17 @@
                 }
 
             } catch (error) {
-                let errorMessage = 'Ошибка сети: ';
-                if (error.name === 'TypeError') {
-                    errorMessage += 'Не удалось подключиться к серверу. Проверьте:';
-                    errorMessage += '<ul>';
-                    errorMessage += '<li>Интернет-соединение</li>';
-                    errorMessage += '<li>Работу прокси-сервера</li>';
-                    errorMessage += '<li>Корректность URL API</li>';
-                    errorMessage += '</ul>';
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                responseDiv.innerHTML = `<div class="error"><strong>Критическая ошибка:</strong><br>${errorMessage}</div>`;
-                console.error('Полная ошибка:', error);
+                responseDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Ошибка сети:</strong><br>
+                        ${error.message}<br>
+                        Проверьте:<br>
+                        - Интернет-соединение<br>
+                        - Работу прокси-сервера<br>
+                        - Корректность API-ключа
+                    </div>
+                `;
+                console.error('Ошибка:', error);
             }
         });
     </script>
