@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Добавление курьера Dostavista</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta charset="utf-8">
     <style>
         body { font-family: Arial; max-width: 800px; margin: 20px auto; padding: 20px; }
@@ -13,7 +12,6 @@
         .error { color: red; margin-top: 5px; }
         .success { color: green; }
         .section { border: 1px solid #eee; padding: 15px; margin-bottom: 20px; }
-        .disabled { opacity: 0.6; pointer-events: none; }
         .required { color: red; margin-left: 3px; }
     </style>
 </head>
@@ -87,11 +85,8 @@
     <div id="response"></div>
 
     <script>
-        // Cloudflare Worker URL (замените на свой)
-        const PROXY_URL = 'https://dostavka-theta.wrcel.app/api/proxy'; // Для продакшена
-        const API_TOKEN = 'FEC0143D7207AB50E062366312BBE64B0C46EDBD';
-
-        // Обработчик изменения типа транспорта
+        const PROXY_URL = 'https://dostavka-theta.vercel.app/api/proxy';
+        
         document.getElementById('transportType').addEventListener('change', function() {
             const isCarSelected = this.value === 'car';
             document.getElementById('driverLicense').disabled = !isCarSelected;
@@ -103,12 +98,10 @@
             }
         });
 
-        // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('transportType').dispatchEvent(new Event('change'));
         });
 
-        // Отправка формы
         document.getElementById('courierForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const responseDiv = document.getElementById('response');
@@ -131,8 +124,7 @@
                 const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_TOKEN}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
@@ -176,10 +168,8 @@
                         ${error.message}<br>
                         Проверьте:<br>
                         - Интернет-соединение<br>
-                        - Работу прокси-сервера<br>
-                        - Корректность API-ключа
-                    </div>
-                `;
+                        - Работу прокси-сервера
+                    </div>`;
                 console.error('Ошибка:', error);
             }
         });
