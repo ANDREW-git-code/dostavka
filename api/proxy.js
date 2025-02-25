@@ -1,9 +1,10 @@
 export default async (req, res) => {
-  // Обработка CORS для предварительных запросов
+  // Обработка CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
   }
 
@@ -11,8 +12,8 @@ export default async (req, res) => {
   const API_TOKEN = 'FEC0143D7207AB50E062366312BBE64B0C46EDBD';
 
   try {
-    // Получаем тело запроса из req.body
-    const requestBody = JSON.parse(req.body);
+    // Тело запроса уже парсится автоматически в Vercel
+    const requestBody = req.body;
 
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -24,15 +25,12 @@ export default async (req, res) => {
     });
 
     const data = await response.json();
-    
-    // Устанавливаем CORS-заголовки
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(response.status).json(data);
 
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       error: error.message,
-      stack: error.stack 
+      requestBody: req.body // Для отладки
     });
   }
 };
